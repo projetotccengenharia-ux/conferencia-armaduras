@@ -1,0 +1,8 @@
+ifcopenshell>=0.8
+numpy
+streamlit>=1.36
+reportlab
+qrcode[pil]
+pandas
+openpyxl
+firebase-admin

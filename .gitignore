@@ -1,0 +1,6 @@
+.streamlit/secrets.toml
+*.json
+!firestore.indexes.json
+*.ifc
+*.IFC
+__pycache__/

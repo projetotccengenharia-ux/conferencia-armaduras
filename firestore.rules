@@ -1,0 +1,23 @@
+rules_version = '2';
+// Regras de segurança do Firestore (cole em Console > Firestore > Regras).
+// O SITE grava com a conta de serviço, que ignora estas regras.
+// O APP (usuários logados) só pode: ler tudo e alterar os campos de conferência.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /obras/{obraId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+
+      match /elementos/{elId} {
+        allow read: if request.auth != null;
+        allow update: if request.auth != null
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'conferido_por', 'data_conferencia', 'barras_conferidas', 'observacao']);
+      }
+      match /conferencias/{cId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null;   // histórico: só acrescenta
+      }
+    }
+  }
+}
