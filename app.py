@@ -15,17 +15,26 @@ st.caption("IFC do TQS → pilares, vigas e lajes com suas barras → etiquetas 
 
 # ---------- Firebase (opcional: só funciona se a chave estiver nos Secrets) ----------
 @st.cache_resource
-def banco():
-    try:
-        import firebase_db
-        if "firebase" in st.secrets:
-            return firebase_db.conectar(dict(st.secrets["firebase"]))
-    except Exception as e:  # sem secrets configurado ou chave inválida
-        st.session_state["erro_fb"] = str(e)
-    return None
+def _conectar(chave_json):
+    import firebase_db
+    return firebase_db.conectar(json.loads(chave_json))
 
-db = banco()
-if db is None:
+db, erro_fb = None, None
+try:
+    tem_chave = "firebase" in st.secrets
+except Exception:          # nenhum secrets configurado
+    tem_chave = False
+if tem_chave:
+    try:
+        db = _conectar(json.dumps(dict(st.secrets["firebase"])))
+    except Exception as e:
+        erro_fb = f"{type(e).__name__}: {e}"
+
+if db is not None:
+    st.success(f"Conectado ao Firebase ({st.secrets['firebase'].get('project_id', '')}).", icon="✅")
+elif erro_fb:
+    st.error("A chave do Firebase está nos Secrets, mas deu erro ao conectar:\n\n" + erro_fb)
+else:
     st.info("Firebase não configurado — o site funciona, mas só gera os arquivos para baixar. "
             "Veja o README para colocar a chave em *Secrets*.", icon="ℹ️")
 
